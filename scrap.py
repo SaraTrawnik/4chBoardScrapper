@@ -7,6 +7,14 @@ def hand_shake(board): #gets the list of all threads
   r = requests.get(url="http://a.4cdn.org/"+board+"/catalog.json")
   return [str(z['no']) for x in r.json() for z in x['threads']]
 
+def get_files_in_thread(r, board, files):
+  for x in [str(z['tim'])+str(z['ext']) for z in r if 'tim' in z]:
+    if not(x in files):
+      resp = requests.get("http://i.4cdn.org/"+board+"/"+x, stream=True) # problematic line
+        with open(x, 'wb') as saveFile:
+          for chunk in resp.iter_content(1024):
+            saveFile.write(chunk)
+                    
 def check_for_preferences(subcom, preference, ignore):
   if any(x in subcom for x in preference['blacklist']):
     return False
@@ -40,8 +48,10 @@ if __name__ == '__main__':
     
   # get all of the preferences from `keywords`
   pref = open_preferences(args.keywords)
+  
   # get all link of threads you want downloaded / remember about current 4chan 4channel split
   all_links = ["http://a.4cdn.org/"+args.board+"/thread/"+x+".json" for x in hand_shake(args.board)]
+  
   # get links of all pictures in the thread
   queue_to_download = {}
   for x in all_links: # should be like: get info from thread, download thread
@@ -49,4 +59,12 @@ if __name__ == '__main__':
     r = requests.get(url=x).json()
     if args.all or check_for_preferences( get_description(r), pref, args.ignore ) is True:
       queue_to_download[r['posts'][0]['no']] = r['posts']
+      
   # get actual pictures and store in the dir named after a thread
+  for key, item in queue_to_download.items():
+    directory = "./"+args.board+str(key) #make a directory after first post
+    if not(os.path.isdir(directory)):
+      os.mkdir(directory)
+    os.chdir(directory)
+    get_files_in_thread( item, args.board, os.listdir("../"+directory) )
+    os.chdir('..')
