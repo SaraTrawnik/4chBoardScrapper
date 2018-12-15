@@ -1,14 +1,14 @@
-# BoardScrap
+# 4chBoardScrapper
 
 ## Example
 ```
- python3 BoardScrap.py -k keywords a
+ python3 scrap.py -k keywords a
 ```
 this one will scrap all the images on /a/ board and which fit they keyword and ask you about ones not in keywords
  
 ## usage
 ```
-BoardScrap.py [-h] [-k KEYWORDS] [-i] board
+scrap.py [-h] [-k KEYWORDS] [-i] board
 
 positional arguments:
   board                 which board you want to scrap
